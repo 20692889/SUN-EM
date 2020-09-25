@@ -86,58 +86,84 @@ function [FEKO_Efield] = parseFEKOefefile(Const, efe_filename)
     line=fgetl(fid);
     efe_line_data = strsplit(line);
     FEKO_Efield.coordinate_system = efe_line_data{3};
+    % ========================
+    % Read the number of x samples
+    % ========================
+
+    line=fgetl(fid);
+    efe_line_data = strsplit(line);
+    FEKO_Efield.number_x_samples = str2num(efe_line_data{5});
+
+
+
+    % ========================
+    % Read the number of y samples
+    % ========================
+    line=fgetl(fid);
+    efe_line_data = strsplit(line);
+    FEKO_Efield.number_y_samples = str2num(efe_line_data{5});
+    % ========================
+    % Read the number of z samples
+    % ========================
+    line=fgetl(fid);
+    efe_line_data = strsplit(line);
+    FEKO_Efield.number_z_samples = str2num(efe_line_data{5});
 
     % ========================
     % Read the number of R samples
     % ========================
-    line=fgetl(fid);
-    efe_line_data = strsplit(line);
-    FEKO_Efield.number_r_samples = str2num(efe_line_data{5});
+    %line=fgetl(fid);
+    %efe_line_data = strsplit(line);
+    %FEKO_Efield.number_r_samples = str2num(efe_line_data{5});
 
     % ========================
     % Read the number of Theta samples
     % ========================
-    line=fgetl(fid);
-    efe_line_data = strsplit(line);
-    FEKO_Efield.number_theta_samples = str2num(efe_line_data{5});
+   % line=fgetl(fid);
+   % efe_line_data = strsplit(line);
+   % FEKO_Efield.number_theta_samples = str2num(efe_line_data{5});
 
     % ========================
     % Read the number of Phi samples
     % ========================
-    line=fgetl(fid);
-    efe_line_data = strsplit(line);
-    FEKO_Efield.number_phi_samples = str2num(efe_line_data{5});
+    %line=fgetl(fid);
+    %efe_line_data = strsplit(line);
+    %FEKO_Efield.number_phi_samples = str2num(efe_line_data{5});
 
     % Skip a few lines again
     line=fgetl(fid);
     line=fgetl(fid);
     line=fgetl(fid);
     
-    number_field_points = FEKO_Efield.number_r_samples*FEKO_Efield.number_theta_samples*FEKO_Efield.number_phi_samples;
+    number_field_points = FEKO_Efield.number_x_samples*FEKO_Efield.number_y_samples*FEKO_Efield.number_z_samples;
 
     % Initialise the field-point values
     % Note: The frequency axis has not yet been defined.
+  % Cartesian co-ordinate (x, y, z)
+    FEKO_Efield.x_samples_m = zeros(number_field_points,1);
+    FEKO_Efield.y_samples_m = zeros(number_field_points,1);
+    FEKO_Efield.z_samples_m = zeros(number_field_points,1);
 
     % Spherical co-ordinate (r, theta, phi)
-    FEKO_Efield.r_samples_m = zeros(number_field_points,1);
-    FEKO_Efield.theta_samples_deg = zeros(number_field_points,1);
-    FEKO_Efield.phi_samples_deg = zeros(number_field_points,1);
+   % FEKO_Efield.r_samples_m = zeros(number_field_points,1);
+   % FEKO_Efield.theta_samples_deg = zeros(number_field_points,1);
+   % FEKO_Efield.phi_samples_deg = zeros(number_field_points,1);
         
     % E-field value (Er, Etheta, Ephi)
-    FEKO_Efield.Er = complex(zeros(number_field_points,1));
-    FEKO_Efield.Etheta = complex(zeros(number_field_points,1));
-    FEKO_Efield.Ephi = complex(zeros(number_field_points,1));
+    FEKO_Efield.Ex = complex(zeros(number_field_points,1));
+    FEKO_Efield.Ey = complex(zeros(number_field_points,1));
+    FEKO_Efield.Ez = complex(zeros(number_field_points,1));
 
     for efield_indx = 1:number_field_points
         line=fgetl(fid);
         efe_line_data = strsplit(line);
         
-        FEKO_Efield.r_samples_m(efield_indx,1) = str2double(efe_line_data{2});
-        FEKO_Efield.theta_samples_deg(efield_indx,1) = str2double(efe_line_data{3});
-        FEKO_Efield.phi_samples_deg(efield_indx,1) = str2double(efe_line_data{4});
+        FEKO_Efield.x_samples_m(efield_indx,1) = str2double(efe_line_data{2});
+        FEKO_Efield.y_samples_m(efield_indx,1) = str2double(efe_line_data{3});
+        FEKO_Efield.z_samples_m(efield_indx,1) = str2double(efe_line_data{4});
         
-        FEKO_Efield.Er(efield_indx,1) = str2double(efe_line_data{5}) + 1i*str2double(efe_line_data{6});
-        FEKO_Efield.Etheta(efield_indx,1) = str2double(efe_line_data{7}) + 1i*str2double(efe_line_data{8});
-        FEKO_Efield.Ephi(efield_indx,1) = str2double(efe_line_data{9}) + 1i*str2double(efe_line_data{10});
+        FEKO_Efield.Ex(efield_indx,1) = str2double(efe_line_data{5}) + 1i*str2double(efe_line_data{6});
+        FEKO_Efield.Ey(efield_indx,1) = str2double(efe_line_data{7}) + 1i*str2double(efe_line_data{8});
+        FEKO_Efield.Ez(efield_indx,1) = str2double(efe_line_data{9}) + 1i*str2double(efe_line_data{10});
 
     end%while end_flag == 0

@@ -1,4 +1,4 @@
-function [Const, zMatrices, yVectors] = extractSUNEMMoMmatrixEq(Const, Solver_setup)
+function [Const, zMatricesSUNEM, yVectors] = extractSUNEMMoMmatrixEq(Const, Solver_setup)
     %extractSUNEMMoMmatrixEq
     %   Date: 2018.06.10
     %   Usage:
@@ -49,7 +49,7 @@ function [Const, zMatrices, yVectors] = extractSUNEMMoMmatrixEq(Const, Solver_se
     EMag = 1;
     theta_0 = 0;
     phi_0 = 0;
-    
+     
     % -- Calculate the yVectors, i.e. the RHS
     vVecfilltime=tic;        
         yVectors.values = FillVVector(Const,Solver_setup,EMag,theta_0,phi_0);
@@ -69,7 +69,7 @@ function [Const, zMatrices, yVectors] = extractSUNEMMoMmatrixEq(Const, Solver_se
             end%of
 
         else
-            [zMatrices] = FillZMatrixByEdge(Const, Solver_setup);
+            [zMatricesSUNEM] = FillZMatrixByEdge(Const, Solver_setup);
         end%if
     totMatrixSetupTime = toc(zMatfilltime);
     

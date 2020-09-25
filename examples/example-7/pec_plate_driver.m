@@ -26,12 +26,12 @@ Const.runIFBMoMsolver       = false;
 % --------------------------------------------------------------------------------------------------
 % Define input files for extracting FEKO data
 % --------------------------------------------------------------------------------------------------
-Const.FEKOmatfilename          = 'pec_plate.mat';
-Const.FEKOstrfilename          = 'pec_plate.str';
-Const.FEKOrhsfilename          = 'pec_plate.rhs';
-Const.FEKOoutfilename          = 'pec_plate.out';
-Const.FEKOefefilename          = 'pec_plate.efe';
-Const.FEKOffefilename          = 'pec_plate.ffe';
+%Const.FEKOmatfilename          = 'pec_plate.mat';
+%Const.FEKOstrfilename          = 'pec_plate.str';
+%Const.FEKOrhsfilename          = 'pec_plate.rhs';
+%Const.FEKOoutfilename          = 'pec_plate.out';
+%Const.FEKOefefilename          = 'pec_plate.efe';
+%Const.FEKOffefilename          = 'pec_plate.ffe';
 
 % --------------------------------------------------------------------------------------------------
 % Define output files for transferring expansion coefficients back to FEKO data
@@ -60,7 +60,7 @@ Const.use_DGFM_start = false;   % Use the DGFM to calculate the initial (0th) so
 % --------------------------------------------------------------------------------------------------
 % Read the MoM matrix equation from the file
 % --------------------------------------------------------------------------------------------------
-[Const, zMatricesFEKO, yVectorsFEKO, xVectorsFEKO] = extractFEKOMoMmatrixEq(Const);
+%[Const, zMatricesFEKO, yVectorsFEKO, xVectorsFEKO] = extractFEKOMoMmatrixEq(Const);
 
 % --------------------------------------------------------------------------------------------------
 % Parse the setup files to extract the frequency sweep, the geometry and basis function setup 

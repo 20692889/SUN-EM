@@ -35,28 +35,34 @@ function [Z] = FillZMatrixByEdge(Const,Solver_setup)
     % Populate now the variables as used by [1] - esp. replace the use of
     % global variables.
     num_dofs = Solver_setup.num_metallic_edges;       % Replacing global NUM_DOFS
+    fieldDOF = length(Solver_setup.r_c_obs);          % Number of RWG edges in the far field
     elements = Solver_setup.triangle_vertices;        % Replacing global ELEMENTS
     node_coord = Solver_setup.nodes_xyz;              % Replacing global NODE_COORD
     ell = Solver_setup.rwg_basis_functions_length_m;  % Replacing global ELL
+    lp = Solver_setup.lengthP;                        %lenth of observation RWG edges
     
     quad_pts = Const.QUAD_PTS;
     sing     = Const.SING;
     eps_0    = Const.EPS_0;
     mu_0     = Const.MU_0;
 
-    % Extract the triangle midpoints
-    r_c = Solver_setup.triangle_centre_point;
-    rho_c_pls = Solver_setup.rho_c_pls;
-    rho_c_mns = Solver_setup.rho_c_mns;
+    % Extract the triangle midpoints of the field RWG's
+    r_cp_plusy = Solver_setup.r_ct_plusy;
+    r_cp_miny = Solver_setup.r_ct_miny;
+    %r_c = Solver_setup.triangle_centre_point; -- used normally to specify
+    %triangle centre points at field RWG which is now an RWG in the far
+    %field, therefore no longer used
+    rho_c_plsy = Solver_setup.rho_pc_plusy;
+    rho_c_mnsy = Solver_setup.rho_pc_miny;
 
     % Set some general parameters
     number_of_frequencies = Solver_setup.frequencies.freq_num; % Number of frequencies
     Z.numFreq = number_of_frequencies;
-    Z.mBasis  = num_dofs; % number of rows (testing/field functions)
+    Z.mBasis  = fieldDOF; % number of rows (testing/field functions)
     Z.nBasis  = num_dofs; % number of cols (basis/source  functions)
     
     % Allocate some space for our impedance matrix
-    Z.values = complex(zeros(num_dofs,num_dofs,number_of_frequencies)); % Generalized impedance matrix.
+    Z.values = complex(zeros(fieldDOF,num_dofs,number_of_frequencies)); % Generalized impedance matrix.
 
     % We will be calculating the Z matrix at each of the various frequencies:
     for freq_index = 1:number_of_frequencies
@@ -66,7 +72,7 @@ function [Z] = FillZMatrixByEdge(Const,Solver_setup)
         % Calculate some frequency dependent parameters required below
         omega = 2*pi*freq;       % Radial frequency
         lambda = Const.C0/freq;  % Wavelength in m
-        k  = 2*pi/lambda;        % Wavenumber in rad/m
+        k  = (2*pi)/lambda;        % Wavenumber in rad/m
         jk = 1i*k;
 
         if (Const.useEDM)
@@ -85,12 +91,14 @@ function [Z] = FillZMatrixByEdge(Const,Solver_setup)
         % These are eqns. 32 and 33.
         num_edm_approximations = 0;
         num_std_zmn_entries_calculated = 0;
-        for mm = 1:num_dofs
+        for mm = 1:fieldDOF %step through observation points
 
             %pp_pls = EDGECONXELEMS(mm,1);            
-            pp_pls = Solver_setup.rwg_basis_functions_trianglePlus(mm);
+            %pp_pls = Solver_setup.rwg_basis_functions_trianglePlus(mm);
+            pp_pls = mm; %no longer need, but set to run code
+            pp_mns = mm; %no longer need, but set to run code
             %pp_mns = EDGECONXELEMS(mm,2);
-            pp_mns = Solver_setup.rwg_basis_functions_triangleMinus(mm);
+            %pp_mns = Solver_setup.rwg_basis_functions_triangleMinus(mm);
 
             if (Const.useEDM)
                 % Extract the precalculated dipole moment for edge mm
@@ -163,7 +171,7 @@ function [Z] = FillZMatrixByEdge(Const,Solver_setup)
                     % -- Contribution from Tn+
                     
                     [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_pls,qq_pls,mm,nn,triangle_tn_plus_free_vertex,...
-                        k,r_c,quad_pts,sing,eps_0,mu_0,omega);
+                        k,r_cp_plusy,quad_pts,sing,eps_0,mu_0,omega);
                     
                     % [DBD2011] implementation below. I think there is a sign issue here.
                     %Amn_pls_source_pls = MagVecPot;
@@ -176,7 +184,7 @@ function [Z] = FillZMatrixByEdge(Const,Solver_setup)
                     % -- Contribution from Tn-
                     
                     [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_pls,qq_mns,mm,nn,triangle_tn_minus_free_vertex,...
-                        k,r_c,quad_pts,sing,eps_0,mu_0,omega);
+                        k,r_cp_plusy,quad_pts,sing,eps_0,mu_0,omega);
                     % [DBD2011] implementation below. I think there is a sign issue here.
                     %Amn_pls_source_mns = - MagVecPot;
                     %Phi_mn_pls_source_mns = +ScalPot;
@@ -192,7 +200,7 @@ function [Z] = FillZMatrixByEdge(Const,Solver_setup)
                     % --------------------------------------------------------------
                     % -- Contribution from Tn+
                     [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_mns,qq_pls,mm,nn,triangle_tn_plus_free_vertex,...
-                        k,r_c,quad_pts,sing,eps_0,mu_0,omega);
+                        k,r_cp_miny,quad_pts,sing,eps_0,mu_0,omega);
                     % [DBD2011] implementation below. I think there is a sign issue here.
                     %Amn_mns_source_pls = MagVecPot;
                     %Phi_mn_mns_source_pls = -ScalPot;
@@ -202,7 +210,7 @@ function [Z] = FillZMatrixByEdge(Const,Solver_setup)
                     
                     % -- Contribution from Tn-                
                     [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_mns,qq_mns,mm,nn,triangle_tn_minus_free_vertex,...
-                        k,r_c,quad_pts,sing,eps_0,mu_0,omega);
+                        k,r_cp_miny,quad_pts,sing,eps_0,mu_0,omega);
                     % [DBD2011] implementation below. I think there is a sign issue here.
                     %Amn_mns_source_mns = - MagVecPot;
                     %Phi_mn_mns_source_mns = +ScalPot;
@@ -215,11 +223,11 @@ function [Z] = FillZMatrixByEdge(Const,Solver_setup)
                            
                     % Assemble with eq. 17 in [RWG82]
                     Z.values(mm,nn) = 1i*omega*...
-                        (dot(Amn_pls',rho_c_pls(mm,:))/2 + dot(Amn_mns',rho_c_mns(mm,:))/2) + Phi_mn_mns - Phi_mn_pls;
+                        (dot(Amn_pls',rho_c_plsy(mm,:)/2) + dot(Amn_mns',rho_c_mnsy(mm,:))/2) + Phi_mn_mns - Phi_mn_pls;
                     
                     %mm
                     %nn
-                    Z.values(mm,nn) = ell(mm)* Z.values(mm,nn);                    
+                    Z.values(mm,nn) = lp* Z.values(mm,nn); %use field edge length, lp, not ell(mm)                   
                 end % if (~Zmn_calculated)
                 
             end % for nn = 1:NUM_DOFS
@@ -243,7 +251,7 @@ function [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell, field_pt,sour
 
     % Code for debugging singularity scheme below:
     %[Ipq,Ipq_xi,Ipq_eta,Ipq_zeta] = Int_pq_debug(field_pt,source_pt,r_c(field_pt,:),k,quad_pts,sing);
-    [Ipq,Ipq_xi,Ipq_eta,Ipq_zeta] = Int_pq(elements,node_coord, field_pt,source_pt,r_c(field_pt,:),k,quad_pts,sing);
+    [Ipq,Ipq_xi,Ipq_eta,Ipq_zeta] = Int_pq(elements,node_coord, field_edge,source_pt,r_c(field_edge,:),k,quad_pts,sing);
     
     % Extract the nodes of the source triangle (q)
     qnodes = elements(source_pt,:);    

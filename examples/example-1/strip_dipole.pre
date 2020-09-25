@@ -52,7 +52,7 @@ CB: 2 : internal_2
 ** Important - for the geometry to be processed in FEKO-Connect, we need to write it to the *.out file
 ** That is done here at the EG card
 ** End of geometry
-EG   0    0    0                                                                                    0
+EG: 0 : 0 : 0 :  :  :  :  :  :  :  :  :  : 0
 
 ** For FEKO-Connect, we use the 'PS' card to output the *.mat and *.str files
 PS: 0 : 1 : 1 : 0 : 0
@@ -61,7 +61,7 @@ PS: 0 : 1 : 1 : 0 : 0
 FR   1                        #freq
 
 ** Data output
-DA: 1 : 0 : 1 : 0 : 0 : 0 : 0 : 0 : 0 : 0
+DA: 1 : 1 : 3 : 0 : 0 : 0 : 0 : 0 : 0 : 0
 
 ******************************************
 ** The Excitation and requests          **
@@ -71,13 +71,14 @@ DA: 1 : 0 : 1 : 0 : 0 : 0 : 0 : 0 : 0 : 0
 AE: 0 : internal_1 : internal_2 : 0 : 1 : 1 : 0
 
 ** Request Currents
-OS   1         1
+OS: 1 :  : 1
 
 ** Calculate now the Electric field at a distance of 1m from the antenna
 #rdist = 100 ** [m]
 ** Request E-field (for comparison with MATLAB implementation)
-FE: 1 : 1 : 1 : 91 : 2 : #rdist : 90 : 0 : 0 : 1 : 1
-
+FE: 1 : 1 : 30 : 1 : 0 : #rdist : 10 : #rdist : 1 : 1 : 1
+** Request H-field (for comparison with MATLAB implementation)
+FE: 2 : 1 : 30 : 1 : 0 : #rdist : 10 : #rdist : 1 : 1 : 1
 ** Calculate far-fields along a theta cut
 FF: 1 : 1 : 91 : 0 : 0 : 90 : 0 : 1 : 1 :  :  : 0
 

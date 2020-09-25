@@ -24,8 +24,8 @@ function vectorAspherical = transformCartesianVectorToSpherical(vectorAcartesian
     %   =======================
 
     r = sqrt(x^2 + y^2 + z^2);
-    theta = acos(x/r);
-    phi = atan(y/x); 
+    theta = atan(y/x);
+    phi = acos(z/r); 
 
     Ax = vectorAcartesian(1);
     Ay = vectorAcartesian(2);
@@ -33,6 +33,8 @@ function vectorAspherical = transformCartesianVectorToSpherical(vectorAcartesian
 
     Ar = Ax*sin(theta)*cos(phi) + Ay*sin(theta)*sin(phi) + Az*cos(theta);
     Atheta = Ax*cos(theta)*cos(phi) + Ay*cos(theta)*sin(phi) - Az*sin(theta);
-    Aphi = -Ax*sin(phi) + Ay*cos(phi);
+    Aphi = -Ax*sin(theta) + Ay*cos(phi);
 
     vectorAspherical = [Ar Atheta Aphi];
+    
+end
