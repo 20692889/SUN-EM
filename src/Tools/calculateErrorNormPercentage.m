@@ -12,13 +12,13 @@ function errorNormPercentage = calculateErrorNormPercentage(refData, data)
     %           The relative (2-norm) error expressed as a percentage
     %
     %   Description:
-    %       Calculates the relative error norm [%], based on the two input vectors:
+    %       Calculates the relative 2-error norm [%], based on the two input vectors:
     %   =======================
 
     error(nargchk(2,2,nargin));
 
     if ( length(refData) ~= length(data) )
-        error('[calculateErrorNormPercentage] Data-sets not the same size'); 
+        error('Data-sets not the same size'); 
     end
 
     differenceSum = 0;

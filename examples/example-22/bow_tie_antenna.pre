@@ -1,0 +1,92 @@
+*******************************
+** General Variables         **
+*******************************
+#lam = 1
+#freq = #c0/#lam
+
+*******************************
+** Element Variables         **
+*******************************
+#a = #lam ** square edge length
+
+#L = 0.45*#lam
+**#L = #lam/2
+#w = 0.02
+
+#ell_xoff = 0*#lam ** element offset, with regards to global co-ordinate X-axis
+#ell_yoff = -0.225*#lam ** element offset, with regards to global co-ordinate Y-axis
+#ell_zoff = 0*#lam ** element offset, with regards to global co-ordinate Z-axis
+
+*******************************
+** Meshing                   **
+*******************************
+** Mesh size
+#t_edge = #lam/2   ** #lam/10 creates 29 basis-functions on Bowtie
+                    ** #lam/30 creates 195 basis-functions on Bowtie
+#s_rad = 4E-6
+#s_len = #lam/15
+IP:  :  :  :  :  : #s_rad : #t_edge : #s_len
+
+*******************************
+** The Bowtie element          **
+*******************************
+
+#b = 6*#w
+
+** Side 1
+DP: A :  :  :  :  : -#b : 0 : 0
+DP: B :  :  :  :  : #w+#b : 0 : 0
+DP: C :  :  :  :  : #w : #L/2 : 0
+DP: D :  :  :  :  : 0 : #L/2 : 0
+LA: 1
+BQ: A : B : C : D
+
+** Side 2
+DP: E :  :  :  :  : 0 : #L/2 : 0
+DP: F :  :  :  :  : #w : #L/2 : 0
+DP: G :  :  :  :  : #w+#b : #L : 0
+DP: H :  :  :  :  : -#b : #L : 0
+LA: 2
+BQ: E : F : G : H
+
+**********************************************************************************
+** Functionality of the 'FA' card, presented by using TG cards                  **
+**********************************************************************************
+
+#tg_inc=100  ** Used to ensure that only the base-element is copied when using
+              ** the 'TG' card
+
+** End of geometry
+EG: 0 : 0 : 0 :  :  :  :  :  :  :  :  :  : 0
+
+** Control efficient/non-efficient fill of [A], requires the SU card
+PS: 0 : 1 : 1 : 0 : 0
+
+** Frequency
+FR   1                        #freq
+
+** Data output
+DA: 1 : 1 : 3 : 0 : 0 : 0 : 0 : 0 : 0 : 0
+
+** Control preconditioning
+CG   -1        -1
+
+*******************************
+** The Excitation            **
+*******************************
+
+** Excited by AE source
+AE: 0 : 1 : 2 : 0 : 1 : 1
+
+** Request Currents
+OS   1         1
+
+** Calculate now the Electric field at a distance of 1m from the antenna
+#rdist = 1000 ** [m]
+** Request E-field (for comparison with MATLAB implementation)
+FE: 1 : 5 : 5 : 1 : 0 : -25 : 0.225 : #rdist : 10 : 1 : 1
+FF: 1 : 360 : 360 :  : 0 : 0 : 0 : 1 : 1 :  :  : 1
+FF: -1 : 10 : 30 : 0 : 0 : 0 : 90 : 1 : 1 : 1 : 1 : 1
+** End of file
+EN
+

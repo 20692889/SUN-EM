@@ -77,7 +77,7 @@ function [mom] = runMoMsolver(Const, Solver_setup, zMatrices, yVectors, refIsol)
         SourceRWGs = [1:Nmom];
         % Note: Since 2017-06-25, we are also passing a freq. variable here to
         % indicate for which frequency point we are extracting the matrix
-        Zmom = (calcZmn(Const, zMatrices, freq, 1, 1, ObservRWGs, SourceRWGs));
+        Zmom = (calcZmn(Const,0,Solver_setup,zMatrices, freq, 1, 1, ObservRWGs, SourceRWGs));
 
         % End timing (calculating the impedance matrix)
         mom.setupTime(freq) = toc;

@@ -376,6 +376,8 @@ function Const = sunem_init(Const, yVectors)
     % =================================
     % Other initialisations:
     Const.useACA = false; % ACA interface available, but not yet activated. (Requires some refactoring).
+    Const.useACAtol = 1/100;
+    Const.useACAfixedIterations = -1;
     Const.ACAalg = 3; % When ACA is activated, we use the efficient algorithm (3).
     Const.store_to_fcd_file = false; % Store to external *.fcd file - useful when importing into POSTFEKO.
     Const.useCSCBFM = false;

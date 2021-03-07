@@ -1,4 +1,4 @@
-function [EfieldAtPointCartesian, HfieldAtPointCartesian] =  calculateEfieldAtPointRWG(Const, z, x_steps, y_steps, ...
+function [EfieldAtPointCartesian] =  calculateEfieldAtPointRWG(Const, z, x_steps, y_steps, ...
     Solver_setup, Isol)
     %calculateEfieldAtPointRWG
     %   Usage:
@@ -41,7 +41,7 @@ function [EfieldAtPointCartesian, HfieldAtPointCartesian] =  calculateEfieldAtPo
     EfieldAtPointCartesian = zeros(Solver_setup.frequencies.freq_num, 3);
    % EfieldAtPointSpherical = zeros(Solver_setup.frequencies.freq_num, 3);
     
-    HfieldAtPointCartesian = zeros(Solver_setup.frequencies.freq_num, 3);
+   % HfieldAtPointCartesian = zeros(Solver_setup.frequencies.freq_num, 3);
    % HfieldAtPointSpherical = zeros(Solver_setup.frequencies.freq_num, 3);
 
     % Transform the point P = (r,theta,phi) to P = (x,y,z)
@@ -148,12 +148,12 @@ function [EfieldAtPointCartesian, HfieldAtPointCartesian] =  calculateEfieldAtPo
             
             %calculate the H-field (x,y,z) due to this RWG Basis Function.
             %First calculate (m x rL)
-            mcrossrL = cross(mvec, rLvecCom);
-            HfieldCurrentRWGelement = A*mcrossrL*C*phaseTerm;
+         %   mcrossrL = cross(mvec, rLvecCom);
+         %   HfieldCurrentRWGelement = A*mcrossrL*C*phaseTerm;
             
-            HfieldAtPointCartesian(freq_index, 1) = HfieldAtPointCartesian(freq_index, 1) + HfieldCurrentRWGelement(1);
-            HfieldAtPointCartesian(freq_index, 2) = HfieldAtPointCartesian(freq_index, 2) + HfieldCurrentRWGelement(2);
-            HfieldAtPointCartesian(freq_index, 3) = HfieldAtPointCartesian(freq_index, 3) + HfieldCurrentRWGelement(3);
+        %    HfieldAtPointCartesian(freq_index, 1) = HfieldAtPointCartesian(freq_index, 1) + HfieldCurrentRWGelement(1);
+        %    HfieldAtPointCartesian(freq_index, 2) = HfieldAtPointCartesian(freq_index, 2) + HfieldCurrentRWGelement(2);
+        %    HfieldAtPointCartesian(freq_index, 3) = HfieldAtPointCartesian(freq_index, 3) + HfieldCurrentRWGelement(3);
             
         end
 

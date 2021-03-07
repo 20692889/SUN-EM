@@ -1,4 +1,4 @@
-function [Z] = FillZMatrixByEdge(Const,Solver_setup)    
+function [Zx, Zy, Zz] = FillZMatrixByEdge(Const,Solver_setup)    
     %FillZMatrixByEdge
     %   Date: 2018.06.10
     %   Usage:
@@ -47,22 +47,40 @@ function [Z] = FillZMatrixByEdge(Const,Solver_setup)
     mu_0     = Const.MU_0;
 
     % Extract the triangle midpoints of the field RWG's
+    r_cp_plusx = Solver_setup.r_ct_plusx;
+    r_cp_minx = Solver_setup.r_ct_minx;
     r_cp_plusy = Solver_setup.r_ct_plusy;
     r_cp_miny = Solver_setup.r_ct_miny;
+    r_cp_plusz = Solver_setup.r_ct_plusz;
+    r_cp_minz = Solver_setup.r_ct_minz;
     %r_c = Solver_setup.triangle_centre_point; -- used normally to specify
     %triangle centre points at field RWG which is now an RWG in the far
     %field, therefore no longer used
+    rho_c_plsx = Solver_setup.rho_pc_plusx;
+    rho_c_mnsx = Solver_setup.rho_pc_minx;
     rho_c_plsy = Solver_setup.rho_pc_plusy;
     rho_c_mnsy = Solver_setup.rho_pc_miny;
+    rho_c_plsz = Solver_setup.rho_pc_plusz;
+    rho_c_mnsz = Solver_setup.rho_pc_minz;
 
     % Set some general parameters
     number_of_frequencies = Solver_setup.frequencies.freq_num; % Number of frequencies
-    Z.numFreq = number_of_frequencies;
-    Z.mBasis  = fieldDOF; % number of rows (testing/field functions)
-    Z.nBasis  = num_dofs; % number of cols (basis/source  functions)
+    Zx.numFreq = number_of_frequencies;
+    Zx.mBasis  = fieldDOF; % number of rows (testing/field functions)
+    Zx.nBasis  = num_dofs; % number of cols (basis/source  functions)
+    
+    Zy.numFreq = number_of_frequencies;
+    Zy.mBasis  = fieldDOF; % number of rows (testing/field functions)
+    Zy.nBasis  = num_dofs; % number of cols (basis/source  functions)
+    
+    Zz.numFreq = number_of_frequencies;
+    Zz.mBasis  = fieldDOF; % number of rows (testing/field functions)
+    Zz.nBasis  = num_dofs; % number of cols (basis/source  functions)
     
     % Allocate some space for our impedance matrix
-    Z.values = complex(zeros(fieldDOF,num_dofs,number_of_frequencies)); % Generalized impedance matrix.
+    Zx.values = complex(zeros(fieldDOF,num_dofs,number_of_frequencies)); % Generalized impedance matrix.
+    Zy.values = complex(zeros(fieldDOF,num_dofs,number_of_frequencies)); % Generalized impedance matrix.
+    Zz.values = complex(zeros(fieldDOF,num_dofs,number_of_frequencies)); % Generalized impedance matrix.
 
     % We will be calculating the Z matrix at each of the various frequencies:
     for freq_index = 1:number_of_frequencies
@@ -135,7 +153,7 @@ function [Z] = FillZMatrixByEdge(Const,Solver_setup)
                         C = (one_over_R_mag)*(one_over_R_mag)*(1 + (1/jk)*one_over_R_mag);
 
                         % Calculate Zmn as done in [2, Eq. 6]
-                        Z.values(mm,nn) = C1*exp(-jk*R_mag) * ( dot(ed_m_moment,ed_n_moment)*(jk*one_over_R_mag + C) - ...
+                        Zx.values(mm,nn) = C1*exp(-jk*R_mag) * ( dot(ed_m_moment,ed_n_moment)*(jk*one_over_R_mag + C) - ...
                              dot(ed_m_moment,R_hat)*dot(R_hat,ed_n_moment)*(jk*one_over_R_mag + 3*C) );
 
                         % Set a flag that we are now done with this matrix entry
@@ -170,64 +188,146 @@ function [Z] = FillZMatrixByEdge(Const,Solver_setup)
                     % --------------------------------------------------------------
                     % -- Contribution from Tn+
                     
+                    %x-direction
                     [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_pls,qq_pls,mm,nn,triangle_tn_plus_free_vertex,...
-                        k,r_cp_plusy,quad_pts,sing,eps_0,mu_0,omega);
+                        k,r_cp_plusx,quad_pts,sing,eps_0,mu_0,omega);
                     
                     % [DBD2011] implementation below. I think there is a sign issue here.
                     %Amn_pls_source_pls = MagVecPot;
                     %Phi_mn_pls_source_pls = -ScalPot;
                     % [DL - 2018] implementation: Swop the signs around
-                    Amn_pls_source_pls = -MagVecPot;
-                    Phi_mn_pls_source_pls = +ScalPot;
+                    Amn_pls_source_plsx = -MagVecPot;
+                    Phi_mn_pls_source_plsx = +ScalPot;
+                    %y-direction
+                    [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_pls,qq_pls,mm,nn,triangle_tn_plus_free_vertex,...
+                        k,r_cp_plusy,quad_pts,sing,eps_0,mu_0,omega);
 
+                    Amn_pls_source_plsy = -MagVecPot;
+                    Phi_mn_pls_source_plsy = +ScalPot;
+                    %z-direction
+                    [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_pls,qq_pls,mm,nn,triangle_tn_plus_free_vertex,...
+                        k,r_cp_plusz,quad_pts,sing,eps_0,mu_0,omega);
+
+                    Amn_pls_source_plsz = -MagVecPot;
+                    Phi_mn_pls_source_plsz = +ScalPot;
                     
                     % -- Contribution from Tn-
                     
+                    %x-direction
                     [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_pls,qq_mns,mm,nn,triangle_tn_minus_free_vertex,...
-                        k,r_cp_plusy,quad_pts,sing,eps_0,mu_0,omega);
+                        k,r_cp_plusx,quad_pts,sing,eps_0,mu_0,omega);
                     % [DBD2011] implementation below. I think there is a sign issue here.
                     %Amn_pls_source_mns = - MagVecPot;
                     %Phi_mn_pls_source_mns = +ScalPot;
                     % [DL - 2018] implementation: Swop the signs around
-                    Amn_pls_source_mns = + MagVecPot;
-                    Phi_mn_pls_source_mns = -ScalPot;
+                    Amn_pls_source_mnsx = + MagVecPot;
+                    Phi_mn_pls_source_mnsx = -ScalPot;
                                     
-                    Amn_pls = Amn_pls_source_pls + Amn_pls_source_mns;
-                    Phi_mn_pls = Phi_mn_pls_source_pls + Phi_mn_pls_source_mns;
+                    Amn_plsx = Amn_pls_source_plsx + Amn_pls_source_mnsx;
+                    Phi_mn_plsx = Phi_mn_pls_source_plsx + Phi_mn_pls_source_mnsx;
+                    
+                    %y-direction
+                    [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_pls,qq_mns,mm,nn,triangle_tn_minus_free_vertex,...
+                        k,r_cp_plusy,quad_pts,sing,eps_0,mu_0,omega);
+                    
+                    Amn_pls_source_mnsy = + MagVecPot;
+                    Phi_mn_pls_source_mnsy = -ScalPot;
+                                    
+                    Amn_plsy = Amn_pls_source_plsy + Amn_pls_source_mnsy;
+                    Phi_mn_plsy = Phi_mn_pls_source_plsy + Phi_mn_pls_source_mnsy;
+                    
+                    %z-direction
+                    [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_pls,qq_mns,mm,nn,triangle_tn_minus_free_vertex,...
+                        k,r_cp_plusz,quad_pts,sing,eps_0,mu_0,omega);
+                    
+                    Amn_pls_source_mnsz = + MagVecPot;
+                    Phi_mn_pls_source_mnsz = -ScalPot;
+                                    
+                    Amn_plsz = Amn_pls_source_plsz + Amn_pls_source_mnsz;
+                    Phi_mn_plsz = Phi_mn_pls_source_plsz + Phi_mn_pls_source_mnsz;
+                    
+                    
                     
                     % --------------------------------------------------------------                
                     % Look at Tm-
                     % --------------------------------------------------------------
                     % -- Contribution from Tn+
+                    
+                    %x-direction
                     [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_mns,qq_pls,mm,nn,triangle_tn_plus_free_vertex,...
-                        k,r_cp_miny,quad_pts,sing,eps_0,mu_0,omega);
+                        k,r_cp_minx,quad_pts,sing,eps_0,mu_0,omega);
                     % [DBD2011] implementation below. I think there is a sign issue here.
                     %Amn_mns_source_pls = MagVecPot;
                     %Phi_mn_mns_source_pls = -ScalPot;
                     % [DL - 2018] implementation: Swop the signs around
-                    Amn_mns_source_pls = -MagVecPot;
-                    Phi_mn_mns_source_pls = +ScalPot;
+                    Amn_mns_source_plsx = -MagVecPot;
+                    Phi_mn_mns_source_plsx = +ScalPot;
                     
-                    % -- Contribution from Tn-                
-                    [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_mns,qq_mns,mm,nn,triangle_tn_minus_free_vertex,...
+                    %y-direction
+                    [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_mns,qq_pls,mm,nn,triangle_tn_plus_free_vertex,...
                         k,r_cp_miny,quad_pts,sing,eps_0,mu_0,omega);
+
+                    Amn_mns_source_plsy = -MagVecPot;
+                    Phi_mn_mns_source_plsy = +ScalPot;
+                    
+                                        
+                    %z-direction
+                    [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_mns,qq_pls,mm,nn,triangle_tn_plus_free_vertex,...
+                        k,r_cp_minz,quad_pts,sing,eps_0,mu_0,omega);
+
+                    Amn_mns_source_plsz = -MagVecPot;
+                    Phi_mn_mns_source_plsz = +ScalPot;
+                    
+                    
+                    
+                    % -- Contribution from Tn-    
+                    %x-direction
+                    [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_mns,qq_mns,mm,nn,triangle_tn_minus_free_vertex,...
+                        k,r_cp_minx,quad_pts,sing,eps_0,mu_0,omega);
                     % [DBD2011] implementation below. I think there is a sign issue here.
                     %Amn_mns_source_mns = - MagVecPot;
                     %Phi_mn_mns_source_mns = +ScalPot;
                     % [DL - 2018] implementation: Swop the signs around
-                    Amn_mns_source_mns = +MagVecPot;
-                    Phi_mn_mns_source_mns = -ScalPot;
+                    Amn_mns_source_mnsx = +MagVecPot;
+                    Phi_mn_mns_source_mnsx = -ScalPot;
                     
-                    Amn_mns = Amn_mns_source_pls + Amn_mns_source_mns;
-                    Phi_mn_mns = Phi_mn_mns_source_pls + Phi_mn_mns_source_mns;
+                    Amn_mnsx = Amn_mns_source_plsx + Amn_mns_source_mnsx;
+                    Phi_mn_mnsx = Phi_mn_mns_source_plsx + Phi_mn_mns_source_mnsx;
+                    
+                    %y-direction
+                    
+                    [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_mns,qq_mns,mm,nn,triangle_tn_minus_free_vertex,...
+                        k,r_cp_miny,quad_pts,sing,eps_0,mu_0,omega);
+
+                    Amn_mns_source_mnsy = +MagVecPot;
+                    Phi_mn_mns_source_mnsy = -ScalPot;
+                    
+                    Amn_mnsy = Amn_mns_source_plsy + Amn_mns_source_mnsy;
+                    Phi_mn_mnsy = Phi_mn_mns_source_plsy + Phi_mn_mns_source_mnsy;
+                    
+                    %z-direction
+                    [MagVecPot,ScalPot] = Potentials(elements,node_coord,ell,pp_mns,qq_mns,mm,nn,triangle_tn_minus_free_vertex,...
+                        k,r_cp_minz,quad_pts,sing,eps_0,mu_0,omega);
+
+                    Amn_mns_source_mnsz = +MagVecPot;
+                    Phi_mn_mns_source_mnsz = -ScalPot;
+                    
+                    Amn_mnsz = Amn_mns_source_plsz + Amn_mns_source_mnsz;
+                    Phi_mn_mnsz = Phi_mn_mns_source_plsz + Phi_mn_mns_source_mnsz;
                            
                     % Assemble with eq. 17 in [RWG82]
-                    Z.values(mm,nn) = 1i*omega*...
-                        (dot(Amn_pls',rho_c_plsy(mm,:)/2) + dot(Amn_mns',rho_c_mnsy(mm,:))/2) + Phi_mn_mns - Phi_mn_pls;
-                    
+                    Zx.values(mm,nn) = 1i*omega*...
+                        (dot(Amn_plsx',rho_c_plsx(mm,:)/2) + dot(Amn_mnsx',rho_c_mnsx(mm,:))/2) + Phi_mn_mnsx - Phi_mn_plsx;
+                    Zy.values(mm,nn) = 1i*omega*...
+                        (dot(Amn_plsy',rho_c_plsy(mm,:)/2) + dot(Amn_mnsy',rho_c_mnsy(mm,:))/2) + Phi_mn_mnsy - Phi_mn_plsy;
+                    Zz.values(mm,nn) = 1i*omega*...
+                        (dot(Amn_plsz',rho_c_plsz(mm,:)/2) + dot(Amn_mnsz',rho_c_mnsz(mm,:))/2) + Phi_mn_mnsz - Phi_mn_plsz;
                     %mm
                     %nn
-                    Z.values(mm,nn) = lp* Z.values(mm,nn); %use field edge length, lp, not ell(mm)                   
+                    Zx.values(mm,nn) = lp* Zx.values(mm,nn); %use field edge length, lp, not ell(mm) 
+                    Zy.values(mm,nn) = lp* Zy.values(mm,nn); %use field edge length, lp, not ell(mm) 
+                    Zz.values(mm,nn) = lp* Zz.values(mm,nn); %use field edge length, lp, not ell(mm) 
+                    
                 end % if (~Zmn_calculated)
                 
             end % for nn = 1:NUM_DOFS

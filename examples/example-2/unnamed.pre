@@ -1,0 +1,20 @@
+** Author: WF de la Bat
+** Date: 2021.02.04
+**  MoM horn and LE-PO reflector
+
+******************************************
+** General Variables                    **
+******************************************
+
+#freq = 12.5e9 **(The operating frequency.)
+#lam = #c0/#freq **(Free space wavelength.)
+#lam_w = 0.0293 **(The guide wavelength.)
+#h_a = 0.51*#lam **(The waveguide radius.)
+#h_b0 = 0.65*#lam **(Flare base radius.)
+#h_b = #lam **(Flare top radius.)
+#h_l = 3.05*#lam **(Flare length.)
+#ph_centre = -2.6821e-3 **(Horn phase centre.)
+#R = 18*#lam **(Reflector radius.)
+#F = 25*#lam **(Reflector focal length.)
+#w_l = 2*#lam_w **(The waveguide length.)
+

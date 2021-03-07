@@ -1,4 +1,4 @@
-function [Const, zMatricesSUNEM, yVectors] = extractSUNEMMoMmatrixEq(Const, Solver_setup)
+function [Const, zMatricesSUNEMx, zMatricesSUNEMy, zMatricesSUNEMz, yVectors] = extractSUNEMMoMmatrixEq(Const, Solver_setup)
     %extractSUNEMMoMmatrixEq
     %   Date: 2018.06.10
     %   Usage:
@@ -69,7 +69,8 @@ function [Const, zMatricesSUNEM, yVectors] = extractSUNEMMoMmatrixEq(Const, Solv
             end%of
 
         else
-            [zMatricesSUNEM] = FillZMatrixByEdge(Const, Solver_setup);
+            [zMatricesSUNEMx,zMatricesSUNEMy, zMatricesSUNEMz] = FillZMatrixByEdge(Const, Solver_setup);
+            
         end%if
     totMatrixSetupTime = toc(zMatfilltime);
     
